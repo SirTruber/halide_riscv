@@ -32,3 +32,5 @@ void convolution_nhwc_halide(float* src, float* kernel, float* dst,
 void convolution_opencv(const cv::Mat& src, const cv::Mat& weights, cv::Mat& dst,
                         int inpChannels, int outChannels);
 #endif  // HAVE_OPENCV_DNN
+void voxel_up(float* src, float* kernel, float* dst,
+                    int inpChannels, int height, int width, int depth);
