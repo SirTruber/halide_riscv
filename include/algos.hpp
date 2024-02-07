@@ -34,3 +34,4 @@ void convolution_opencv(const cv::Mat& src, const cv::Mat& weights, cv::Mat& dst
 #endif  // HAVE_OPENCV_DNN
 void voxel_up(float* src, float* kernel, float* dst,
                     int inpChannels, int height, int width, int depth);
+void upscale(const std::vector<std::string> img_path, int width, int height);
