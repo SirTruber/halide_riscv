@@ -27,11 +27,13 @@ using namespace voxel_upscale_const;
 void voxel_up( float* src, float* kernel, float* dst,
                     int inpChannels, int width, int height, int batch){
 
-    Halide::Buffer<float> input(src, {width, height, batch, inpChannels});
-    Halide::Buffer<float> weights(kernel, {ker_width, ker_height, ker_depth});
-    Halide::Buffer<float> output(dst, { width * scale_width, height * scale_height, batch * scale_depth, inpChannels});
+    Halide::Runtime::Buffer<float> input(src, {width, height, batch, inpChannels});
+    Halide::Runtime::Buffer<float> weights(kernel, {ker_width, ker_height, ker_depth, inpChannels});
+    Halide::Runtime::Buffer<float> output(dst, { width * scale_width, height * scale_height, batch * scale_depth, inpChannels});
 
-
+#ifdef __riscv
+    deconv(input,weights,output);
+#else
     static Halide::Func deconv("deconvolution");
     if (!deconv.defined()) {
         input.set_name("input");
@@ -53,12 +55,12 @@ void voxel_up( float* src, float* kernel, float* dst,
                                                           0, (batch - 1) * scale_depth + 1,
                                                           0, inpChannels
                                                           );
-        Halide::RDom r( 0, ker_width, 0, ker_height, 0, ker_depth);
+        Halide::RDom r( 0, ker_width, 0, ker_height, 0, ker_depth, 0, inpChannels);
         Halide::Expr kx = x + pad_width - r.x;
         Halide::Expr ky = y + pad_height - r.y;
         Halide::Expr kz = z + pad_depth - r.z;
         deconv(x, y, z, c) = Halide::sum(bounded(kx, ky, kz, c) *
-                                         weights( r.x, r.y, r.z));
+                                         weights( r.x, r.y, r.z, r.w));
         bounded.compute_root();
 
         deconv.bound(x, 0, width * scale_width)
@@ -67,8 +69,8 @@ void voxel_up( float* src, float* kernel, float* dst,
               .bound(c, 0, inpChannels);
 
         deconv.realize(output);
-
     }
+#endif
 }
 
 void upscale(std::vector<std::string> img_path, int width, int height)
