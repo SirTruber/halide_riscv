@@ -44,6 +44,7 @@ ExternalProject_Add(opencv
     "-DWITH_IPP=OFF"
     "-DWITH_JASPER=OFF"
     "-DWITH_QUIRC=OFF"
+    "-DWITH_EIGEN=OFF"
     "-DWITH_ITT=OFF"
     "-DWITH_ADE=OFF"
     "-DWITH_OPENCL=OFF"
